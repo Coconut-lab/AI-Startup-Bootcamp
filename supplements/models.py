@@ -19,10 +19,8 @@ class User(AbstractUser):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    # 필요한 프로필 필드 추가
     bio = models.TextField(blank=True)
     birth_date = models.DateField(null=True, blank=True)
-    # 추가하고 싶은 다른 프로필 필드들...
 
     def __str__(self):
         return f"{self.user.username}'s profile"
@@ -36,3 +34,25 @@ class Supplement(models.Model):
 
     def __str__(self):
         return self.name
+
+class Storage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}의 {self.name}"
+
+class StorageItem(models.Model):
+    storage = models.ForeignKey(Storage, on_delete=models.CASCADE, related_name='items')
+    supplement = models.ForeignKey(Supplement, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['storage', 'supplement']
+
+    def __str__(self):
+        return f"{self.storage.name}의 {self.supplement.name}"
