@@ -1,4 +1,3 @@
-//signup.dart
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'login.dart';
@@ -17,15 +16,52 @@ class _SignupScreenState extends State<SignupScreen> {
       TextEditingController();
   final TextEditingController _emailController = TextEditingController();
 
-  bool _isUsernameDuplicate = false;
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _privacyPolicyAccepted = false;
+  bool _isUsernameDuplicate = false;
+  bool _isUsernameChecked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameController.addListener(_onUsernameChanged);
+  }
+
+  void _onUsernameChanged() {
+    if (_isUsernameChecked) {
+      setState(() {
+        _isUsernameChecked = false;
+      });
+    }
+  }
 
   void _checkDuplicateUsername() {
+    if (_usernameController.text.length < 4) {
+      setState(() {
+        _isUsernameDuplicate = true;
+        _isUsernameChecked = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('아이디는 4글자 이상이어야 합니다.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() {
-      _isUsernameDuplicate = _usernameController.text.length < 4;
+      _isUsernameDuplicate = false;
+      _isUsernameChecked = true;
     });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('사용 가능한 아이디입니다.'),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   Future<void> _showPrivacyPolicyDialog() async {
@@ -61,14 +97,14 @@ class _SignupScreenState extends State<SignupScreen> {
                   ],
                 ),
                 SizedBox(
-                  width: 50,
-                  height: 50,
+                  width: 70,
+                  height: 70,
                   child: Image.asset(
                     'assets/dc_logo.png',
                     fit: BoxFit.contain,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 5),
                 const Text(
                   '개인정보 처리방침',
                   style: TextStyle(
@@ -77,7 +113,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 const Text(
                   '수집되는 개인정보는 아이디, 비밀번호, 이메일, 검색기록으로 제한되며, 이는 맞춤형 영양제 추천 서비스 제공과 서비스 개선을 위한 목적으로만 사용됩니다. 모든 개인정보는 암호화되어 안전하게 관리되며, 회원은 언제든지 개인정보 열람 및 삭제를 요청할 수 있습니다. 법적 요구사항을 제외하고는 어떠한 경우에도 제3자에게 개인정보를 제공하지 않으며, 회원 탈퇴 시 즉시 개인정보를 파기합니다. 개인정보 보호를 위해 최신 보안 기술을 적용하고 최소한의 인원만이 접근할 수 있도록 엄격하게 관리합니다.',
                   style: TextStyle(
@@ -85,37 +121,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     height: 1.5,
                   ),
                   textAlign: TextAlign.justify,
-                ),
-                const SizedBox(height: 20),
-                Column(
-                  children: [
-                    const Text(
-                      '동의',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: 'Dohyeon',
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginPage(),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
@@ -180,6 +185,16 @@ class _SignupScreenState extends State<SignupScreen> {
       return false;
     }
 
+    if (!_isUsernameChecked) {
+      _showErrorSnackBar('아이디 중복 확인을 해주세요.');
+      return false;
+    }
+
+    if (_isUsernameDuplicate) {
+      _showErrorSnackBar('사용할 수 없는 아이디입니다.');
+      return false;
+    }
+
     if (_passwordController.text.isEmpty) {
       _showErrorSnackBar('비밀번호를 입력해주세요.');
       return false;
@@ -214,6 +229,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   void dispose() {
+    _usernameController.removeListener(_onUsernameChanged);
     _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -291,8 +307,11 @@ class _SignupScreenState extends State<SignupScreen> {
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
                           ),
-                          errorText:
-                              _isUsernameDuplicate ? '이미 사용 중인 아이디입니다.' : null,
+                          errorText: _isUsernameDuplicate
+                              ? '사용할 수 없는 아이디입니다.'
+                              : _isUsernameChecked
+                                  ? null
+                                  : '중복 확인이 필요합니다.',
                         ),
                       ),
                     ),

@@ -73,10 +73,10 @@ class _UserEditPageState extends State<UserEditPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('$_baseUrl/update-password'),
+        Uri.parse('$_baseUrl/change-password'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'username_id': userId,
+          'user_id': userId,
           'current_password': _currentPasswordController.text,
           'new_password': _newPasswordController.text,
         }),
@@ -89,7 +89,7 @@ class _UserEditPageState extends State<UserEditPage> {
         _currentPasswordController.clear();
         _newPasswordController.clear();
         _showSuccessMessage('비밀번호가 변경되었습니다.');
-      } else if (response.statusCode == 401) {
+      } else if (response.statusCode == 400) {
         _showErrorMessage('현재 비밀번호가 올바르지 않습니다.');
       } else {
         _showErrorMessage('비밀번호 변경에 실패했습니다.');
