@@ -44,7 +44,7 @@ class StartPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    '데이터캡슐로부터\n영양제 추천을 받아볼까요?',
+                    '로부터\n영양제 추천을 받아볼까요?',
                     style: TextStyle(
                         fontFamily: 'Dohyeon',
                         fontSize: 32,
@@ -58,7 +58,7 @@ class StartPage extends StatelessWidget {
                           )
                         ]),
                   ),
-                  const SizedBox(height: 300),
+                  const SizedBox(height: 290),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
